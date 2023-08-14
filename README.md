@@ -4,7 +4,8 @@
 [![Latest Stable Version](https://poser.pugx.org/wp-oop/http-client/v)][packagist]
 [![Latest Unstable Version](https://poser.pugx.org/wp-oop/http-client/v/unstable)][packagist]
 
-A PSR-18 wrapper for the [WordPress HTTP API][wp-http-api].
+A [PSR-18][psr-18] wrapper for the [WordPress HTTP API][wp-http-api].
 
 [packagist]: https://packagist.org/packages/wp-oop/http-client
 [wp-http-api]: https://developer.wordpress.org/plugins/http-api/
+[psr-18]: https://www.php-fig.org/psr/psr-18/
