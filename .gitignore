@@ -4,6 +4,8 @@
 /.idea/codeStyles/
 /.idea/inspectionProfiles/
 /.idea/misc.xml
+/.idea/phpspec.xml
+/.idea/codeception.xml
 /.env
 
 /.phpunit.result.cache

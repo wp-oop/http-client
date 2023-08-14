@@ -1,6 +1,6 @@
 {
-  "name": "dhii/php-project",
-  "description": "A PHP starter to ease project creation",
+  "name": "wp-oop/http-client",
+  "description": "A PSR-18 wrapper for the WordPress HTTP API",
   "minimum-stability": "dev",
   "license": "MIT",
   "authors": [
@@ -21,12 +21,12 @@
   },
   "autoload": {
     "psr-4": {
-      "Me\\Library\\": "src"
+      "WpOop\\HttpClient\\": "src"
     }
   },
   "autoload-dev": {
     "psr-4": {
-      "Me\\Library\\Test\\Func\\": "tests/functional"
+      "WpOop\\HttpClient\\Test\\Func\\": "tests/functional"
     }
   },
   "config": {

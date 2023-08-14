@@ -2,7 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/php-project.iml" filepath="$PROJECT_DIR$/.idea/php-project.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/http-client.iml" filepath="$PROJECT_DIR$/.idea/http-client.iml" />
     </modules>
   </component>
 </project>
