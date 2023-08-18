@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace WpOop\HttpClient;
 
 use Nyholm\Psr7\Stream;
@@ -113,7 +115,6 @@ class Client implements ClientInterface
      * @param string $httpVer
      * @param string $reason
      *
-     * @return ResponseInterface
      * @throws RuntimeException If problem creating.
      */
     protected function createResponse(
