@@ -43,6 +43,10 @@ decoupling from any concrete [PSR-7][] implementation.
 You can use any [PSR-17 implementation][psr-17-implementations] or [PSR-7 implementations][psr-7-implementations].
 I suggest the slim and efficient [nyholm/psr7][], which conveniently implements both.
 
+## Limitations
+Currently only throws [`ClientExceptionInterface`][], as it is unable to reliably determine whether a network or
+another specific kind of problem has occurred from the error value returned by [`wp_remote_request()`][].
+
 
 [packagist]: https://packagist.org/packages/wp-oop/http-client
 [wp-http-api]: https://developer.wordpress.org/plugins/http-api/
@@ -53,3 +57,5 @@ I suggest the slim and efficient [nyholm/psr7][], which conveniently implements 
 [psr-7-implementations]: https://packagist.org/providers/psr/http-message-implementation
 [nyholm/psr7]: https://packagist.org/packages/nyholm/psr7
 [github-workflow]: https://github.com/wp-oop/http-client/actions/workflows/continuous-integration.yml
+[`wp_remote_request()`]: https://developer.wordpress.org/reference/functions/wp_remote_request/
+[`ClientExceptionInterface`]: https://github.com/php-fig/http-client/blob/master/src/ClientExceptionInterface.php
