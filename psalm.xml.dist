@@ -142,5 +142,7 @@
         <MixedReturnStatement errorLevel="info"/>
         <MixedReturnTypeCoercion errorLevel="info"/>
         <MixedStringOffsetAssignment errorLevel="info"/>
+        <UnusedClass errorLevel="info"/>
+        <UnusedForeachValue errorLevel="info"/>
     </issueHandlers>
 </psalm>
