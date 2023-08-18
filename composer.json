@@ -26,6 +26,9 @@
     "nyholm/psr7": "^1.7",
     "brain/monkey": "^2.6.1"
   },
+  "suggest": {
+    "nyholm/psr7": "A slim and efficient PSR-7 and PSR-17 implementation"
+  },
   "autoload": {
     "psr-4": {
       "WpOop\\HttpClient\\": "src"
