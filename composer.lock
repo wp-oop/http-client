@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "8e5168bc5adddbccd7641caffc544a0d",
+    "content-hash": "c3599cd0dfa887980c5f665138e4892c",
     "packages": [
         {
             "name": "nyholm/psr7",
@@ -2157,16 +2157,16 @@
         },
         {
             "name": "phpunit/phpunit",
-            "version": "9.6.x-dev",
+            "version": "9.6.10",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/phpunit.git",
-                "reference": "53e630fa7af1fc75652dc029ab5f023b3fe734f8"
+                "reference": "a6d351645c3fe5a30f5e86be6577d946af65a328"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/53e630fa7af1fc75652dc029ab5f023b3fe734f8",
-                "reference": "53e630fa7af1fc75652dc029ab5f023b3fe734f8",
+                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/a6d351645c3fe5a30f5e86be6577d946af65a328",
+                "reference": "a6d351645c3fe5a30f5e86be6577d946af65a328",
                 "shasum": ""
             },
             "require": {
@@ -2240,7 +2240,7 @@
             "support": {
                 "issues": "https://github.com/sebastianbergmann/phpunit/issues",
                 "security": "https://github.com/sebastianbergmann/phpunit/security/policy",
-                "source": "https://github.com/sebastianbergmann/phpunit/tree/9.6"
+                "source": "https://github.com/sebastianbergmann/phpunit/tree/9.6.10"
             },
             "funding": [
                 {
@@ -2256,7 +2256,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2023-08-16T06:34:57+00:00"
+            "time": "2023-07-10T04:04:23+00:00"
         },
         {
             "name": "psr/container",
@@ -4673,6 +4673,7 @@
     "aliases": [],
     "minimum-stability": "dev",
     "stability-flags": {
+        "phpunit/phpunit": 0,
         "webmozart/path-util": 0
     },
     "prefer-stable": false,
