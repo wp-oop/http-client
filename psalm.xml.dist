@@ -24,6 +24,10 @@
         <directory name="src"/>
     </projectFiles>
 
+    <stubs>
+        <file name="vendor/php-stubs/wordpress-stubs/wordpress-stubs.php" />
+    </stubs>
+
 
     <issueHandlers>
         <ConflictingReferenceConstraint errorLevel="error"/>
@@ -138,5 +142,7 @@
         <MixedReturnStatement errorLevel="info"/>
         <MixedReturnTypeCoercion errorLevel="info"/>
         <MixedStringOffsetAssignment errorLevel="info"/>
+        <UnusedClass errorLevel="info"/>
+        <UnusedForeachValue errorLevel="info"/>
     </issueHandlers>
 </psalm>

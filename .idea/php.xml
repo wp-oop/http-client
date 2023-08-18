@@ -78,11 +78,21 @@
       <path value="$PROJECT_DIR$/vendor/fidry/cpu-core-counter" />
       <path value="$PROJECT_DIR$/vendor/spatie/array-to-xml" />
       <path value="$PROJECT_DIR$/vendor/symfony/filesystem" />
+      <path value="$PROJECT_DIR$/vendor/psr/http-client" />
+      <path value="$PROJECT_DIR$/vendor/psr/http-message" />
+      <path value="$PROJECT_DIR$/vendor/johnpbloch/wordpress-core" />
+      <path value="$PROJECT_DIR$/vendor/nyholm/psr7" />
+      <path value="$PROJECT_DIR$/vendor/psr/http-factory" />
+      <path value="$PROJECT_DIR$/vendor/brain/monkey" />
+      <path value="$PROJECT_DIR$/vendor/mockery/mockery" />
+      <path value="$PROJECT_DIR$/vendor/antecedent/patchwork" />
+      <path value="$PROJECT_DIR$/vendor/hamcrest/hamcrest-php" />
+      <path value="$PROJECT_DIR$/vendor/php-stubs/wordpress-stubs" />
     </include_path>
   </component>
   <component name="PhpInterpreters">
     <interpreters>
-      <interpreter id="2321c1fd-1d03-4357-9aee-11d7dbd0c764" name="Build" home="docker-compose://DATA" false="false" debugger_id="php.debugger.XDebug">
+      <interpreter id="2321c1fd-1d03-4357-9aee-11d7dbd0c764" name="Build" home="docker-compose://DATA" auto="false" debugger_id="php.debugger.XDebug">
         <remote_data INTERPRETER_PATH="php" HELPERS_PATH="/opt/.phpstorm_helpers" VALID="true" RUN_AS_ROOT_VIA_SUDO="false" DOCKER_ACCOUNT_NAME="Docker" DOCKER_COMPOSE_SERVICE_NAME="build" DOCKER_REMOTE_PROJECT_PATH="/opt/project">
           <type_data command="RUN" />
           <dockerComposeConfigurationPaths>
@@ -91,7 +101,7 @@
           <envs />
         </remote_data>
       </interpreter>
-      <interpreter id="ba314a65-6074-40c9-8112-007ea3db0a5f" name="Test" home="docker-compose://DATA" false="false" debugger_id="php.debugger.XDebug" debugger_extension="/usr/local/lib/php/extensions/no-debug-non-zts-20220829/xdebug.so">
+      <interpreter id="ba314a65-6074-40c9-8112-007ea3db0a5f" name="Test" home="docker-compose://DATA" auto="false" debugger_id="php.debugger.XDebug" debugger_extension="/usr/local/lib/php/extensions/no-debug-non-zts-20220829/xdebug.so">
         <configuration_options>
           <configuration_option name="xdebug.remote_host" value="host.docker.internal" />
         </configuration_options>
