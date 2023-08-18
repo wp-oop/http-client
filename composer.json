@@ -22,6 +22,7 @@
     "webmozart/path-util": "^2.3@stable",
     "slevomat/coding-standard": "^6.0",
     "johnpbloch/wordpress-core": "6.3",
+    "php-stubs/wordpress-stubs": "6.3",
     "nyholm/psr7": "^1.7",
     "brain/monkey": "^2.6.1"
   },

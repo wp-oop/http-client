@@ -8,6 +8,8 @@ use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
+use RuntimeException;
+use UnexpectedValueException;
 use WP_Error;
 
 /**
@@ -32,6 +34,7 @@ use WP_Error;
  */
 class Client implements ClientInterface
 {
+    /** @var WpRequestOptions */
     protected array $wpOptions;
     protected ResponseFactoryInterface $responseFactory;
 
@@ -68,7 +71,12 @@ class Client implements ClientInterface
      *
      * @param RequestInterface $request The request.
      *
-     * @return WpRequestOptions The prepared args array.
+     * @return WpRequestOptions&array{
+     *     method: string,
+     *     httpversion: string,
+     *     headers: array<string|array<string>>,
+     *     body: string
+     * } The prepared args array.
      */
     protected function prepareArgs(RequestInterface $request): array
     {
@@ -100,11 +108,13 @@ class Client implements ClientInterface
 
     /**
      * @param int $code
-     * @param array<string, scalar|array<scalar>> $headers A map of header names to header value(s).
+     * @param array<string, string|array<string>> $headers A map of header names to header value(s).
      * @param string|StreamInterface $body
      * @param string $httpVer
      * @param string $reason
-     * @return void
+     *
+     * @return ResponseInterface
+     * @throws RuntimeException If problem creating.
      */
     protected function createResponse(
         int $code,
@@ -119,8 +129,12 @@ class Client implements ClientInterface
         // Convert contents to stream
         if (is_scalar($body)) {
             $stream = @fopen('php://temp', 'r+');
+            if ($stream === false) {
+                throw new UnexpectedValueException('Could not open temporary memory stream');
+            }
+
             if ($body !== '') {
-                fwrite($stream, (string) $body);
+                fwrite($stream, $body);
                 fseek($stream, 0);
             }
 
