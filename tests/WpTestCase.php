@@ -14,6 +14,7 @@ class WpTestCase extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
+        require_once ABSPATH . '/wp-includes/class-wp-error.php';
         setUp();
     }
 

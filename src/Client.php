@@ -57,9 +57,27 @@ class Client implements ClientInterface
 
         /** @var WP_Error|array $responseData */
         $responseData = wp_remote_request($uri, $args);
+        if ($responseData instanceof WP_Error) {
+            throw new ClientException(
+                sprintf(
+                    'Could not send request to "%1$s": %2$s',
+                    $uri,
+                    $responseData->get_error_message()
+                )
+            );
+        }
 
         $code = wp_remote_retrieve_response_code($responseData);
-        $code = is_numeric($code) ? (int)$code : 400;
+        if (!is_int($code)) {
+            throw new ClientException(
+                sprintf(
+                    'Server at "%1$s" responded with an invalid code "%2$s"',
+                    $uri,
+                    $code
+                )
+            );
+        }
+
         $reason = wp_remote_retrieve_response_message($responseData);
         $headers = wp_remote_retrieve_headers($responseData);
         $headers = is_array($headers) ? $headers : iterator_to_array($headers);
