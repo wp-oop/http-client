@@ -2,6 +2,7 @@
 
 namespace WpOop\HttpClient\Test\Func;
 
+use bovigo\vfs\vfsStream;
 use Nyholm\Psr7\Factory\Psr17Factory;
 use Nyholm\Psr7\Request;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -10,6 +11,7 @@ use Psr\Http\Message\ResponseFactoryInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
 use Psr\Http\Message\UriInterface;
+use RuntimeException;
 use TypeError;
 use WP_Error;
 use WpOop\HttpClient\Client as Subject;
@@ -102,6 +104,91 @@ class ClientTest extends WpTestCase
 
             $response = $subject->sendRequest($request);
             $this->assertInstanceOf(ResponseInterface::class, $response);
+        }
+    }
+
+    public function testSendRequestStreaming()
+    {
+        {
+            $fs = vfsStream::setup('tmprequest');
+            $fsBaseDir = $fs->url();
+            $streamProxyDir = $fsBaseDir;
+            $streamProxyFile = $this->getTempFilePath($streamProxyDir, 'request');
+            $method = 'POST';
+            $url = sprintf('http://somesite.com/%1$s', uniqid('path'));
+            $operationId = uniqid('opid');
+            $headers = $this->getDummyHeaders($operationId);
+            $body = uniqid('body');
+            file_put_contents($streamProxyFile, $body); // Write body contents to proxy file
+            $protocolVersion = (rand(1, 100) % 2) ? '1.0' : '1.1';
+            $wpOptions = [
+                'timeout' => rand(1, 60),
+                'redirection' => rand(3, 5),
+            ];
+            $responseFactory = $this->createResponseFactory();
+            $request = $this->createRequest($method, $url, $headers, $body, $protocolVersion);
+            $responseCode = rand(200, 299);
+            $responseMessage = uniqid('response-message');
+            $responseHeaders = $this->getDummyHeaders($operationId);
+            $wpResponse = [
+                'headers' => $responseHeaders,
+                'body' => '',
+                'response' => [
+                    'code' => $responseCode,
+                    'message' => $responseMessage,
+                ],
+                'cookies' => [],
+                'filename' => '',
+            ];
+            $subject = $this->createSubject($wpOptions, $responseFactory, $streamProxyDir);
+        }
+
+        {
+            // Use streaming proxy file at this location
+            $subject->expects($this->exactly(1))
+                ->method('getTempFilePath')
+                ->will($this->returnCallback(function () use ($streamProxyFile) {
+                    return $streamProxyFile;
+                }));
+
+            expect('wp_remote_request')
+                ->with(
+                    $url,
+                    $this->equalToCanonicalizing(array_merge($wpOptions, [
+                        'method' => $method,
+                        'httpversion' => $protocolVersion,
+                        'headers' => $headers,
+                        'body' => $body,
+                        'stream' => true,
+                        'filename' => $streamProxyFile,
+                    ]))
+                )
+                ->andReturn($wpResponse);
+
+            expect('wp_remote_retrieve_response_code')
+                ->times(1)
+                ->with(
+                    $wpResponse
+                )
+                ->andReturn($responseCode);
+
+            expect('wp_remote_retrieve_response_message')
+                ->times(1)
+                ->with(
+                    $wpResponse
+                )
+                ->andReturn($responseMessage);
+
+            expect('wp_remote_retrieve_headers')->mockeryExpectation()
+                ->times(1)
+                ->with(
+                    $wpResponse
+                )
+                ->andReturn($responseHeaders);
+
+            $response = $subject->sendRequest($request);
+            $responseBody = $response->getBody()->getContents();
+            $this->assertEquals($body, $responseBody);
         }
     }
 
@@ -204,16 +291,24 @@ class ClientTest extends WpTestCase
     /**
      * @param WpRequestOptions $wpOptions The non-request-specific options to pass to WordPress.
      * @param ResponseFactoryInterface $responseFactory
+     * @param bool $isMockStreaming If true, the methods that are used for streaming will be mockable.
      *
      * @return Subject&MockObject
      */
     protected function createSubject(
         array $wpOptions,
-        ResponseFactoryInterface $responseFactory
+        ResponseFactoryInterface $responseFactory,
+        bool $isMockStreaming = null
     ): Subject {
+        $methods = [];
+
+        if ($isMockStreaming !== null) {
+            $methods[] = 'getTempFilePath';
+        }
+
         $mock = $this->getMockBuilder(Subject::class)
-            ->setConstructorArgs([$wpOptions, $responseFactory])
-            ->enableProxyingToOriginalMethods()
+            ->onlyMethods($methods)
+            ->setConstructorArgs([$wpOptions, $responseFactory, $isMockStreaming])
             ->enableOriginalConstructor()
             ->getMock();
 
@@ -281,5 +376,28 @@ class ClientTest extends WpTestCase
         }
 
         return $headers;
+    }
+
+    /**
+     * Retrieves a unique path to a new temporary file.
+     *
+     * @param string $dir The directory where the new file will be created.
+     *
+     * @return string The file path.
+     *
+     * @throws RuntimeException If problem retrieving.
+     */
+    protected function getTempFilePath(string $dir, string $prefix = ''): string
+    {
+        $dir = rtrim($dir, '/');
+
+        do {
+            $fileName = uniqid($prefix);
+            $filePath = sprintf('%1$s/%2$s', $dir, $fileName);
+        } while (file_exists($filePath));
+
+        @fclose(fopen($filePath, 'a'));
+
+        return $filePath;
     }
 }

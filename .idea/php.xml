@@ -88,6 +88,7 @@
       <path value="$PROJECT_DIR$/vendor/antecedent/patchwork" />
       <path value="$PROJECT_DIR$/vendor/hamcrest/hamcrest-php" />
       <path value="$PROJECT_DIR$/vendor/php-stubs/wordpress-stubs" />
+      <path value="$PROJECT_DIR$/vendor/mikey179/vfsstream" />
     </include_path>
   </component>
   <component name="PhpInterpreters">
