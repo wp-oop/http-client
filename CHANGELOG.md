@@ -9,3 +9,4 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 ## [0.1.0-alpha1] - 2023-08-18
 ### Added
 - `Client` implementation, with tests (#1).
+- Streaming mode that uses a proxy file (#2).
