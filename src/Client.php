@@ -36,23 +36,39 @@ use WP_Error;
  */
 class Client implements ClientInterface
 {
+    /**
+     * phpcs:ignore SlevomatCodingStandard.TypeHints.UselessConstantTypeHint.UselessVarAnnotation
+     * @var string
+     */
+    public const REQUEST_FILE_PREFIX = 'wpx';
     /** @var WpRequestOptions */
     protected array $wpOptions;
     protected ResponseFactoryInterface $responseFactory;
+    protected ?string $streamProxyDir = null;
 
+    /**
+     * @param WpRequestOptions $wpOptions
+     * @param ?string $streamProxyDir Path to the directory where responses will be saved for streaming.
+     *                                If null, no streaming will be used: response body is kept in memory.
+     */
     public function __construct(
         array $wpOptions,
-        ResponseFactoryInterface $responseFactory
+        ResponseFactoryInterface $responseFactory,
+        ?string $streamProxyDir
     ) {
         $this->wpOptions = $wpOptions;
         $this->responseFactory = $responseFactory;
+        $this->streamProxyDir = $streamProxyDir;
     }
 
     /** @inheritDoc */
     public function sendRequest(RequestInterface $request): ResponseInterface
     {
         $uri = (string)$request->getUri();
-        $args = $this->prepareArgs($request);
+        $bodyFile =  $this->streamProxyDir !== null
+            ? $this->getTempFilePath($this->streamProxyDir)
+            : null;
+        $args = $this->prepareArgs($request, $bodyFile);
         $httpVer = $request->getProtocolVersion();
 
         /** @var WP_Error|array $responseData */
@@ -81,7 +97,9 @@ class Client implements ClientInterface
         $reason = wp_remote_retrieve_response_message($responseData);
         $headers = wp_remote_retrieve_headers($responseData);
         $headers = is_array($headers) ? $headers : iterator_to_array($headers);
-        $body = wp_remote_retrieve_body($responseData);
+        $body = $bodyFile === null
+            ? wp_remote_retrieve_body($responseData)
+            : $this->createStreamFromFile($bodyFile, 'r');
 
         return $this->createResponse($code, $headers, $body, $httpVer, $reason);
     }
@@ -90,22 +108,32 @@ class Client implements ClientInterface
      * Prepares the args array for a specific request. The result can be used with WordPress' remote functions.
      *
      * @param RequestInterface $request The request.
+     * @param ?string $streamProxyFile If specified, a new file with a unique name will be created there.
      *
      * @return WpRequestOptions&array{
      *     method: string,
      *     httpversion: string,
-     *     headers: array<string|array<string>>,
-     *     body: string
+     *     headers: array<string, string|array<string>>,
+     *     body: string,
+     *     stream?: bool,
+     *     filename?: string,
      * } The prepared args array.
      */
-    protected function prepareArgs(RequestInterface $request): array
+    protected function prepareArgs(RequestInterface $request, ?string $streamProxyFile = null): array
     {
-        return array_merge($this->wpOptions, [
+        $args = array_merge($this->wpOptions, [
             'method' => $request->getMethod(),
             'httpversion' => $request->getProtocolVersion(),
             'headers' => $this->prepareHeaders($request),
             'body' => (string)$request->getBody(),
         ]);
+
+        if ($streamProxyFile !== null) {
+            $args['stream'] = true;
+            $args['filename'] = $streamProxyFile;
+        }
+
+        return $args;
     }
 
     /**
@@ -127,11 +155,8 @@ class Client implements ClientInterface
     }
 
     /**
-     * @param int $code
      * @param array<string, string|array<string>> $headers A map of header names to header value(s).
      * @param string|StreamInterface $body
-     * @param string $httpVer
-     * @param string $reason
      *
      * @throws RuntimeException If problem creating.
      */
@@ -145,20 +170,10 @@ class Client implements ClientInterface
         $factory = $this->responseFactory;
         $response = $factory->createResponse($code, $reason);
 
-        // Convert contents to stream
-        if (is_scalar($body)) {
-            $stream = @fopen('php://temp', 'r+');
-            if ($stream === false) {
-                throw new UnexpectedValueException('Could not open temporary memory stream');
-            }
-
-            if ($body !== '') {
-                fwrite($stream, $body);
-                fseek($stream, 0);
-            }
-
-            $body = new Stream($stream);
-        }
+        // Ensure stream
+        $body = ! $body instanceof StreamInterface
+            ? $this->createStreamFromString($body)
+            : $body;
 
         // Set headers
         foreach ($headers as $headerName => $headerValue) {
@@ -169,5 +184,89 @@ class Client implements ClientInterface
         $response = $response->withProtocolVersion($httpVer);
 
         return $response;
+    }
+
+    /**
+     * Retrieves a unique path to a new temporary file.
+     *
+     * @param string $dir The directory where the new file will be created.
+     *
+     * @return string The file path.
+     *
+     * @throws RuntimeException If problem retrieving.
+     */
+    protected function getTempFilePath(string $dir): string
+    {
+        $dir = rtrim($dir, '/');
+        $mode = 'a';
+
+        do {
+            $fileName = uniqid(static::REQUEST_FILE_PREFIX);
+            $filePath = sprintf('%1$s/%2$s', $dir, $fileName);
+        } while (file_exists($filePath));
+
+        $handle = @fopen($filePath, $mode);
+        if ($handle === false) {
+            throw new RuntimeException(sprintf('Could not open file "%1$s" with mode "%2$s"', $filePath, $mode));
+        }
+
+        @fclose($handle);
+
+        return $filePath;
+    }
+
+    /**
+     * Retrieves a standards-compliant stream that points to an open resource.
+     *
+     * @param resource $resource The stream resource to create a standard stream from.
+     *
+     * @return StreamInterface The standards-compliant stream.
+     *
+     * @throws RuntimeException If problem retrieving.
+     */
+    protected function createStreamFromResource($resource): StreamInterface
+    {
+        return new Stream($resource);
+    }
+
+    /**
+     * Retrieves a new open stream that points to the file at the specified path.
+     *
+     * @param string $filePath The path to the file.
+     * @param string $mode The mode to open the file in.
+     *
+     * @return StreamInterface The new open stream.
+     *
+     * @throws RuntimeException If problem retrieving.
+     */
+    protected function createStreamFromFile(string $filePath, string $mode): StreamInterface
+    {
+        $resource = @fopen($filePath, $mode);
+
+        if ($resource === false) {
+            throw new UnexpectedValueException('Could not open temporary memory stream');
+        }
+
+        $stream = $this->createStreamFromResource($resource);
+
+        return $stream;
+    }
+
+    /**
+     * Retrieves a standards-compliant stream with the specified contents.
+     *
+     * @param string $contents The contents for the stream.
+     *
+     * @return StreamInterface The stream.
+     *
+     * @throws RuntimeException If problem retrieving.
+     */
+    protected function createStreamFromString(string $contents): StreamInterface
+    {
+        $stream = $this->createStreamFromFile('php://temp', 'r+');
+        $stream->write($contents);
+        $stream->rewind();
+
+        return $stream;
     }
 }

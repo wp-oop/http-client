@@ -15,14 +15,21 @@ use Psr\Http\Message\ResponseFactoryInterface;
 use WpOop\HttpClient\Client;
 
 /** @var RequestFactoryInterface $requestFactory */
-/** @var ResponseFactoryInterface $responseFacory */
+/** @var ResponseFactoryInterface $responseFactory */
 
 // Set up the client with WP request options
 // https://developer.wordpress.org/reference/classes/wp_http/request/
-$client = new Client([
-    'redirection' => 2,
-    'timeout' => 60,
-], $responseFacory);
+$client = new Client(
+    // Default args to WP_Http::request()
+    [
+        'redirection' => 2,
+        'timeout' => 60,
+    ],
+    $responseFactory,
+    // Path to proxy file dir to enable response streaming.
+    // If null, will buffer in memory instead.
+    get_temp_dir() 
+);
 
 // Create a PSR-7 request in any way you want, for example via a PSR-17 factory
 $request = $requestFactory->createRequest('GET', 'http://somesite.com/api');

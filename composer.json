@@ -24,7 +24,8 @@
     "johnpbloch/wordpress-core": "6.3",
     "php-stubs/wordpress-stubs": "6.3",
     "nyholm/psr7": "^1.7",
-    "brain/monkey": "^2.6.1"
+    "brain/monkey": "^2.6.1",
+    "mikey179/vfsstream": "^1.6.11"
   },
   "suggest": {
     "nyholm/psr7": "A slim and efficient PSR-7 and PSR-17 implementation"
